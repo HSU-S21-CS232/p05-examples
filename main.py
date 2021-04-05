@@ -1,13 +1,44 @@
 #pip install flask
 #pip install flask-session
 
-from flask import Flask, jsonify
+'''
+Goal: flesh out an API for the chinook music store.
+
+# Basic Requirements
+* Expose an endpoint for searching for music:
+    * by name (implemented)
+    * by artist
+    * by genre
+    * by year
+    * by album
+* Be able to add tracks to a "shopping cart"
+    * We need to be able to add, remove, and clear a cart
+* Be able to "check out"
+    * Convert the current shopping cart into an invoice in the DB
+        *This will also create one or more invoice items
+
+# Additional Requirements (options, do what you find interesting)
+* Implement user authentication (e.g. user name = customer email and password = phone number)
+    * Before you can check out, the user must be logged in first
+* Develop an HTML front-end for this application
+
+# As always...
+* If you want to do something completely different go ahead!  Just make sure it's
+  as complex as what I've outlined above.
+
+# Things to cover:
+    * Templating with Jinja
+    * Inserting records into the database
+'''
+
+from flask import Flask, jsonify, request, session
 import database
 import os
 import sqlite3
 import json
 
 app = Flask(__name__)
+app.secret_key = "suiper secret key"
 
 def return_as_json(associative_array):
     json_data = [dict(ix) for ix in associative_array]
@@ -33,3 +64,23 @@ def search_tracks(search_string):
     params = (search_string, )
     result = database.run_query(sql, params)
     return return_as_json(result)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    session['logged_in'] = False
+
+    #request.method determines route type
+    if request.method == 'POST':
+        
+        #request.values contains a dictionary of variables sent to the server
+        if request.values['user_name'] == 'user' and request.values['password'] == 'password':
+
+            #remember log in state through session
+            session['logged_in'] = True
+            return jsonify({'logged_in': session['logged_in'] })
+
+        else:
+            session['logged_in'] = False
+            return jsonify({'logged_in': session['logged_in']})
+    else:
+        return jsonify({'logged_in': session['logged_in']})
