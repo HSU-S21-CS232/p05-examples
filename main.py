@@ -91,3 +91,35 @@ def login():
             return jsonify({'logged_in': session['logged_in']})
     else:
         return jsonify({'logged_in': session['logged_in']})
+
+@app.route('/customer', methods=['POST'])
+def create_customer():
+    sql = """INSERT INTO customers (
+                          FirstName,
+                          LastName,
+                          Company,
+                          Address,
+                          City,
+                          State,
+                          Country,
+                          PostalCode,
+                          Phone,
+                          Fax,
+                          Email,
+                          SupportRepId
+                      )
+                      VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)"""
+    params = (request.values['FirstName'], 
+              request.values['LastName'], 
+              request.values['Company'], 
+              request.values['Address'],
+              request.values['City'],
+              request.values['State'],
+              request.values['Country'],
+              request.values['PostalCode'],
+              request.values['Phone'],
+              request.values['Fax'],
+              request.values['Email']
+              )
+    id = database.run_insert(sql, params)
+    return jsonify({'id': id })
