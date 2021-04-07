@@ -31,7 +31,7 @@ Goal: flesh out an API for the chinook music store.
     * Inserting records into the database
 '''
 
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, render_template
 import database
 import os
 import sqlite3
@@ -39,6 +39,8 @@ import json
 
 app = Flask(__name__)
 app.secret_key = "suiper secret key"
+app.jinja_env.auto_reload = True
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 def return_as_json(associative_array):
     json_data = [dict(ix) for ix in associative_array]
@@ -57,6 +59,11 @@ def about():
 def get_all_tracks():
     result = database.run_query("SELECT * FROM tracks")
     return return_as_json(result)
+
+@app.route('/tracks/html')
+def get_all_tracks_html():
+    result = database.run_query("SELECT * FROM tracks")
+    return render_template("all_tracks.html", data=result)
 
 @app.route('/tracks/byName/<search_string>')
 def search_tracks(search_string):
